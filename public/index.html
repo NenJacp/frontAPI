@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Órdenes</title>
+    <title>Gestión de Órdenes y Usuarios</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h1, h2 {
             color: #333;
         }
         #orderList {
@@ -32,8 +32,15 @@
     </style>
 </head>
 <body>
-    <h1>Gestión de Órdenes</h1>
+    <h1>Gestión de Órdenes y Usuarios</h1>
     
+    <div id="registerForm">
+        <h2>Registro de Usuario</h2>
+        <input type="text" id="registerUsername" placeholder="Usuario">
+        <input type="password" id="registerPassword" placeholder="Contraseña">
+        <button onclick="register()">Registrar</button>
+    </div>
+
     <div id="loginForm">
         <h2>Iniciar Sesión</h2>
         <input type="text" id="username" placeholder="Usuario">
@@ -61,6 +68,28 @@
         const API_URL = 'https://backapi-29lg.onrender.com/api';
         let token = '';
 
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('Usuario registrado con éxito. Por favor, inicie sesión.');
+                } else {
+                    alert('Error en el registro: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -77,6 +106,7 @@
                 if (data.token) {
                     token = data.token;
                     document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('registerForm').style.display = 'none';
                     document.getElementById('orderManagement').style.display = 'block';
                     alert('Inicio de sesión exitoso');
                 } else {
