@@ -1,39 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop Orders</title>
+    <title>API Test</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Coffee Shop Orders</h1>
-    </header>
-    <main>
-        <section id="order-list">
-            <h2>Order List</h2>
-            <ul id="orders"></ul>
-        </section>
-        <section id="order-form">
-            <h2>New Order</h2>
-            <form id="new-order-form">
-                <label for="client">Client Name:</label>
-                <input type="text" id="client" name="client" required>
-                
-                <label for="product">Product:</label>
-                <input type="text" id="product" name="product" required>
-                
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" required min="1">
-                
-                <label for="unit-price">Unit Price:</label>
-                <input type="number" id="unit-price" name="unit-price" step="0.01" required min="0">
-                
-                <button type="submit">Add Order</button>
-            </form>
-        </section>
-    </main>
+    <div class="container">
+        <h1>API Test</h1>
+        
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="loginBtn">Login</button>
+
+        <div id="sessionInfo" style="display: none;">
+            <h2>Sesión Actual</h2>
+            <p id="currentSession"></p>
+            <h2>Órdenes</h2>
+            <input type="text" id="orderDetails" placeholder="Detalles de la orden" required>
+            <button id="createOrderBtn">Crear Orden</button>
+            <button id="getOrdersBtn">Obtener Órdenes</button>
+            <button id="logoutBtn">Cerrar Sesión</button>
+            <div id="orders"></div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
+
