@@ -3,7 +3,6 @@ const API_URL = 'https://backapi-29lg.onrender.com/api';
 let token = '';
 
 async function fetchOrders() {
-    console.login(token);
     try {
         const response = await fetch(`${API_URL}/orders`, {
             method: 'GET',
@@ -13,26 +12,20 @@ async function fetchOrders() {
             },
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            if (Array.isArray(data)) {
-                displayOrders(data);
-            } else {
-                console.error('La respuesta no es un array:', data);
-                alert('Formato de respuesta inesperado');
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            displayOrders(data);
         } else {
-            if (response.status === 401) {
-                alert('Sesión expirada o inválida. Por favor, inicie sesión nuevamente.');
-                logout();
-            } else {
-                const error = await response.json();
-                alert(error.message || 'Error al obtener las órdenes');
-            }
+            console.error('The response is not an array:', data);
+            throw new Error('Unexpected response format');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión');
+        alert('Error fetching orders: ' + error.message);
     }
 }
 
