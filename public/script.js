@@ -1,11 +1,11 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://backapi-29lg.onrender.com';
 
 let token = '';
 
 // Function to fetch and display orders
 async function fetchOrders() {
     try {
-        const response = await fetch(`${API_URL}/orders`, {
+        const response = await fetch(`${API_URL}/api/orders`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
         });
