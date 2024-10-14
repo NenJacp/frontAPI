@@ -13,11 +13,21 @@ async function fetchOrders() {
         });
 
         if (response.ok) {
-            const orders = await response.json();
-            displayOrders(orders);
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                displayOrders(data);
+            } else {
+                console.error('La respuesta no es un array:', data);
+                alert('Formato de respuesta inesperado');
+            }
         } else {
-            const error = await response.json();
-            alert(error.message);
+            if (response.status === 401) {
+                alert('Sesión expirada o inválida. Por favor, inicie sesión nuevamente.');
+                logout();
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Error al obtener las órdenes');
+            }
         }
     } catch (error) {
         console.error('Error:', error);
@@ -151,4 +161,13 @@ function updateOrder(id) {
 function deleteOrder(id) {
     // Implementar la lógica para eliminar una orden
     console.log('Eliminar orden:', id);
+}
+
+function logout() {
+    token = '';
+    document.getElementById('sessionInfo').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('orders').innerHTML = '';
+    alert('Sesión cerrada');
 }
