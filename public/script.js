@@ -1,11 +1,10 @@
-const API_URL = 'https://backapi-29lg.onrender.com';
+const API_URL = 'https://backapi-29lg.onrender.com/api';
 
 let token = '';
 
-// Function to fetch and display orders
 async function fetchOrders() {
     try {
-        const response = await fetch(`${API_URL}/api/orders`, {
+        const response = await fetch(`${API_URL}/orders`, {
             method: 'GET',
             headers: { 
                 'Authorization': `Bearer ${token}`,
@@ -32,17 +31,19 @@ function displayOrders(orders) {
     if (orders.length > 0) {
         const table = document.createElement('table');
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = '<th>ID</th><th>Detalles</th><th>Acciones</th>';
+        headerRow.innerHTML = '<th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th>';
         table.appendChild(headerRow);
 
         orders.forEach(order => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${order.id}</td>
-                <td>${order.details}</td>
+                <td>${order.OrderID}</td>
+                <td>${order.Client}</td>
+                <td>${order.total}</td>
+                <td>${order.status}</td>
                 <td>
-                    <button onclick="updateOrder(${order.id})">Actualizar</button>
-                    <button onclick="deleteOrder(${order.id})">Eliminar</button>
+                    <button onclick="updateOrder(${order.OrderID})">Actualizar</button>
+                    <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
                 </td>`;
             table.appendChild(row);
         });
@@ -53,25 +54,20 @@ function displayOrders(orders) {
     }
 }
 
-// Function to add a new order
-async function addOrder(event) {
-    event.preventDefault();
-    const form = event.target;
-    const client = form.client.value;
-    const product = form.product.value;
-    const quantity = parseInt(form.quantity.value);
-    const unitPrice = parseFloat(form['unit-price'].value);
+async function createOrder() {
+    const orderDetails = document.getElementById('orderDetails').value;
+    const [client, productName, quantity, unitPrice] = orderDetails.split(',');
 
     const newOrder = {
-        Client: client,
+        Client: client.trim(),
         Products: [
             {
-                product_name: product,
-                quantity: quantity,
-                unit_price: unitPrice
+                product_name: productName.trim(),
+                quantity: parseInt(quantity),
+                unit_price: parseFloat(unitPrice)
             }
         ],
-        total: quantity * unitPrice,
+        total: parseInt(quantity) * parseFloat(unitPrice),
         status: "Pendiente",
         delivery_time: "12:00 PM",
         order_date: new Date().toLocaleDateString()
@@ -82,67 +78,9 @@ async function addOrder(event) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newOrder),
-        });
-
-        if (response.ok) {
-            form.reset();
-            fetchOrders();
-        } else {
-            console.error('Error adding order:', await response.text());
-        }
-    } catch (error) {
-        console.error('Error adding order:', error);
-    }
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginBtn').addEventListener('click', login);
-    document.getElementById('createOrderBtn').addEventListener('click', createOrder);
-    document.getElementById('getOrdersBtn').addEventListener('click', fetchOrders);
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-});
-
-async function login() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    try {
-        const response = await fetch(`${API_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            token = data.token;
-            document.getElementById('currentSession').innerText = `Bienvenido, ${username}`;
-            document.getElementById('sessionInfo').style.display = 'block';
-            alert('Login exitoso!');
-        } else {
-            const error = await response.json();
-            alert(error.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error de conexión');
-    }
-}
-
-async function createOrder() {
-    const orderDetails = document.getElementById('orderDetails').value;
-
-    try {
-        const response = await fetch(`${API_URL}/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ details: orderDetails }),
+            body: JSON.stringify(newOrder),
         });
 
         if (response.ok) {
@@ -159,13 +97,50 @@ async function createOrder() {
     }
 }
 
+async function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            token = data.token;
+            document.getElementById('currentSession').innerText = `Bienvenido, ${username}`;
+            document.getElementById('sessionInfo').style.display = 'block';
+            alert('Login exitoso!');
+            fetchOrders();
+        } else {
+            const error = await response.json();
+            alert(error.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    }
+}
+
 function logout() {
     token = '';
     document.getElementById('sessionInfo').style.display = 'none';
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
+    document.getElementById('orders').innerHTML = '';
     alert('Sesión cerrada');
 }
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('createOrderBtn').addEventListener('click', createOrder);
+    document.getElementById('getOrdersBtn').addEventListener('click', fetchOrders);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+});
 
 // Estas funciones necesitan ser implementadas
 function updateOrder(id) {
