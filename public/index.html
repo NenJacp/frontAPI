@@ -3,30 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Test</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Gestión de Órdenes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #orderList {
+            margin-top: 20px;
+        }
+        .order {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>API Test</h1>
-        
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="loginBtn">Login</button>
-
-        <div id="sessionInfo" style="display: none;">
-            <h2>Sesión Actual</h2>
-            <p id="currentSession"></p>
-            <h2>Órdenes</h2>
-            <input type="text" id="orderDetails" placeholder="Detalles de la orden" required>
-            <button id="createOrderBtn">Crear Orden</button>
-            <button id="getOrdersBtn">Obtener Órdenes</button>
-            <button id="logoutBtn">Cerrar Sesión</button>
-            <div id="orders"></div>
-        </div>
+    <h1>Gestión de Órdenes</h1>
+    
+    <div id="loginForm">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Iniciar Sesión</button>
     </div>
 
-    <script src="script.js"></script>
+    <div id="orderManagement" style="display: none;">
+        <button onclick="getOrders()">Obtener Órdenes</button>
+        <div id="orderList"></div>
+
+        <h2>Agregar Nueva Orden</h2>
+        <form id="addOrderForm">
+            <input type="text" id="client" placeholder="Cliente" required>
+            <input type="text" id="products" placeholder="Productos (separados por coma)" required>
+            <input type="number" id="total" placeholder="Total" required>
+            <input type="text" id="status" placeholder="Estado" required>
+            <input type="text" id="deliveryTime" placeholder="Hora de Entrega" required>
+            <input type="text" id="orderDate" placeholder="Fecha de Orden" required>
+            <button type="submit">Agregar Orden</button>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = 'https://backapi-29lg.onrender.com/api';
+        let token = '';
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    token = data.token;
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('orderManagement').style.display = 'block';
+                    alert('Inicio de sesión exitoso');
+                } else {
+                    alert('Error en el inicio de sesión');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getOrders() {
+            fetch(`${API_URL}/orders`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(orders => {
+                const orderList = document.getElementById('orderList');
+                orderList.innerHTML = '';
+                orders.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order';
+                    orderDiv.innerHTML = `
+                        <p>ID: ${order.OrderID}</p>
+                        <p>Cliente: ${order.Client}</p>
+                        <p>Total: ${order.total}</p>
+                        <p>Estado: ${order.status}</p>
+                        <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
+                    `;
+                    orderList.appendChild(orderDiv);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteOrder(id) {
+            fetch(`${API_URL}/orders/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                getOrders();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        document.getElementById('addOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const order = {
+                Client: document.getElementById('client').value,
+                Products: document.getElementById('products').value.split(','),
+                total: parseFloat(document.getElementById('total').value),
+                status: document.getElementById('status').value,
+                delivery_time: document.getElementById('deliveryTime').value,
+                order_date: document.getElementById('orderDate').value
+            };
+
+            fetch(`${API_URL}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(order)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Orden agregada con éxito');
+                getOrders();
+                this.reset();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 </html>
