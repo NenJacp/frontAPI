@@ -3,6 +3,7 @@ const API_URL = 'https://backapi-29lg.onrender.com/api';
 let token = '';
 
 async function fetchOrders() {
+    console.login(token);
     try {
         const response = await fetch(`${API_URL}/orders`, {
             method: 'GET',
