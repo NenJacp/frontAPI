@@ -164,3 +164,66 @@ function getOrderById() {
     })
     .catch(error => console.error('Error:', error));
 }
+
+function editOrder(id) {
+    const client = prompt('Nuevo nombre del cliente:');
+    const products = prompt('Nuevos productos (separados por coma):');
+    const total = parseFloat(prompt('Nuevo total:'));
+    const status = prompt('Nuevo estado:');
+    const deliveryTime = prompt('Nueva hora de entrega:');
+    const orderDate = prompt('Nueva fecha de orden:');
+
+    const updatedOrder = {
+        Client: client,
+        Products: products.split(','),
+        total,
+        status,
+        delivery_time: deliveryTime,
+        order_date: orderDate
+    };
+
+    fetch(`${API_URL}/orders/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedOrder)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Orden actualizada con éxito');
+        getOrders();
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function getOrders() {
+    console.log('Fetching orders...');
+    fetch(`${API_URL}/orders`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const orderList = document.getElementById('orderList');
+        orderList.innerHTML = '';
+        data.forEach(order => {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order';
+            orderDiv.innerHTML = `
+                <p><strong>ID:</strong> ${order.OrderID}</p>
+                <p><strong>Cliente:</strong> ${order.Client}</p>
+                <p><strong>Total:</strong> ${order.total}</p>
+                <p><strong>Estado:</strong> ${order.status}</p>
+                <button onclick="editOrder(${order.OrderID})">Editar</button>
+                <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
+            `;
+            orderList.appendChild(orderDiv);
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
+

@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Gestión de Órdenes y Usuarios</h1>
-    
+    <h1>✨ Gestión de Órdenes y Usuarios ✨</h1>
+
     <div id="registerForm">
         <h2>Registro de Usuario</h2>
         <input type="text" id="registerUsername" placeholder="Usuario">
@@ -34,16 +34,15 @@
             <input type="text" id="orderDate" placeholder="Fecha de Orden" required>
             <button type="submit">Agregar Orden</button>
         </form>
-    
+
         <h2>Buscar Orden por ID</h2>
         <input type="number" id="orderId" placeholder="ID de la Orden">
         <button onclick="getOrderById()">Buscar Orden</button>
-    
+
         <button onclick="getOrders()" style="margin-top: 20px;">Obtener Todas las Órdenes</button>
-    
+
         <div id="orderList"></div>
     </div>
-    
 
     <script src="script.js"></script>
 </body>
