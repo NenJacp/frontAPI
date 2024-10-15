@@ -127,6 +127,10 @@
 }
 
         function getOrders() {
+            const payload = decodeJWT(token);
+console.log('Expiration Time (exp):', new Date(payload.exp * 1000)); // Hora de expiración
+console.log('Issued At (iat):', new Date(payload.iat * 1000)); // Hora de emisión
+console.log('Current Client Time:', new Date());
     console.log('Fetching orders...');
     console.log('Current token:', token);
     fetch(`${API_URL}/orders`, {
@@ -222,6 +226,16 @@
             })
             .catch(error => console.error('Error:', error));
         });
+
+        function decodeJWT(token) {
+    const base64Payload = token.split('.')[1]; // Extrae la segunda parte (payload)
+    const payload = JSON.parse(atob(base64Payload)); // Decodifica base64 a JSON
+    console.log('Decoded Payload:', payload);
+    return payload;
+}
+
+
+
     </script>
 </body>
 </html>
