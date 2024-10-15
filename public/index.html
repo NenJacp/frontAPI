@@ -91,71 +91,87 @@
         }
 
         function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    console.log('Attempting login for user:', username);
 
-            fetch(`${API_URL}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    token = data.token;
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('registerForm').style.display = 'none';
-                    document.getElementById('orderManagement').style.display = 'block';
-                    alert('Inicio de sesión exitoso');
-                } else {
-                    alert('Error en el inicio de sesión');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+    fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    })
+    .then(response => {
+        console.log('Login response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Login response data:', data);
+        if (data.token) {
+            token = data.token;
+            console.log('Received token:', token);
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('orderManagement').style.display = 'block';
+            alert('Inicio de sesión exitoso');
+        } else {
+            console.error('Login error:', data.error);
+            alert('Error en el inicio de sesión: ' + data.error);
         }
+    })
+    .catch(error => {
+        console.error('Login fetch error:', error);
+        alert('Error en la conexión: ' + error.message);
+    });
+}
 
         function getOrders() {
-            fetch(`${API_URL}/orders`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(orders => {
-                const orderList = document.getElementById('orderList');
-                orderList.innerHTML = '';
-                orders.forEach(order => {
-                    const orderDiv = document.createElement('div');
-                    orderDiv.className = 'order';
-                    orderDiv.innerHTML = `
-                        <p>ID: ${order.OrderID}</p>
-                        <p>Cliente: ${order.Client}</p>
-                        <p>Total: ${order.total}</p>
-                        <p>Estado: ${order.status}</p>
-                        <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
-                    `;
-                    orderList.appendChild(orderDiv);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (error.message.includes('401')) {
-                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
-                    logout();
-                } else {
-                    alert('Error al obtener las órdenes');
-                }
-            });
+    console.log('Fetching orders...');
+    console.log('Current token:', token);
+    fetch(`${API_URL}/orders`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
         }
-
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.json().then(data => ({status: response.status, body: data}));
+    })
+    .then(({status, body}) => {
+        console.log('Response body:', body);
+        if (status !== 200) {
+            throw new Error(`HTTP error! status: ${status}`);
+        }
+        const orderList = document.getElementById('orderList');
+        orderList.innerHTML = '';
+        body.forEach(order => {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order';
+            orderDiv.innerHTML = `
+                <p>ID: ${order.OrderID}</p>
+                <p>Cliente: ${order.Client}</p>
+                <p>Total: ${order.total}</p>
+                <p>Estado: ${order.status}</p>
+                <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
+            `;
+            orderList.appendChild(orderDiv);
+        });
+    })
+    .catch(error => {
+        console.error('Error in getOrders:', error);
+        console.log('Error details:', error.message);
+        if (error.message.includes('401')) {
+            console.log('401 error detected, logging out...');
+            alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+            logout();
+        } else {
+            alert('Error al obtener las órdenes: ' + error.message);
+        }
+    });
+}
         function logout() {
             token = '';
             document.getElementById('loginForm').style.display = 'block';
@@ -163,7 +179,7 @@
             document.getElementById('orderManagement').style.display = 'none';
             document.getElementById('orderList').innerHTML = '';
         }
-        
+
         function deleteOrder(id) {
             fetch(`${API_URL}/orders/${id}`, {
                 method: 'DELETE',
