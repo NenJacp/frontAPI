@@ -150,13 +150,17 @@ function getOrderById() {
             const orderDiv = document.createElement('div');
             orderDiv.className = 'order';
             orderDiv.innerHTML = `
-                <p>ID: ${order.OrderID}</p>
-                <p>Cliente: ${order.Client}</p>
-                <p>Productos: ${order.Products.join(', ')}</p>
-                <p>Total: ${order.total}</p>
-                <p>Estado: ${order.status}</p>
-                <p>Hora de Entrega: ${order.delivery_time}</p>
-                <p>Fecha de Orden: ${order.order_date}</p>
+                <p><strong>ID:</strong> ${order.OrderID}</p>
+                <p><strong>Cliente:</strong> ${order.Client}</p>
+                <p><strong>Productos:</strong> ${order.Products.join(', ')}</p>
+                <p><strong>Total:</strong> ${order.total}</p>
+                <p><strong>Estado:</strong> ${order.status}</p>
+                <p><strong>Hora de Entrega:</strong> ${order.delivery_time}</p>
+                <p><strong>Fecha de Orden:</strong> ${order.order_date}</p>
+                <button onclick="editOrder(${order.OrderID}, '${order.Client}', '${order.Products.join(', ')}', 
+                    ${order.total}, '${order.status}', '${order.delivery_time}', '${order.order_date}')">
+                    Editar
+                </button>
                 <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
             `;
             orderList.appendChild(orderDiv);
@@ -165,13 +169,14 @@ function getOrderById() {
     .catch(error => console.error('Error:', error));
 }
 
-function editOrder(id) {
-    const client = prompt('Nuevo nombre del cliente:');
-    const products = prompt('Nuevos productos (separados por coma):');
-    const total = parseFloat(prompt('Nuevo total:'));
-    const status = prompt('Nuevo estado:');
-    const deliveryTime = prompt('Nueva hora de entrega:');
-    const orderDate = prompt('Nueva fecha de orden:');
+
+function editOrder(id, currentClient, currentProducts, currentTotal, currentStatus, currentDeliveryTime, currentOrderDate) {
+    const client = prompt('Nuevo nombre del cliente:', currentClient);
+    const products = prompt('Nuevos productos (separados por coma):', currentProducts);
+    const total = parseFloat(prompt('Nuevo total:', currentTotal));
+    const status = prompt('Nuevo estado:', currentStatus);
+    const deliveryTime = prompt('Nueva hora de entrega:', currentDeliveryTime);
+    const orderDate = prompt('Nueva fecha de orden:', currentOrderDate);
 
     const updatedOrder = {
         Client: client,
@@ -193,10 +198,11 @@ function editOrder(id) {
     .then(response => response.json())
     .then(data => {
         alert('Orden actualizada con éxito');
-        getOrders();
+        getOrders(); // Recargar la lista de órdenes para mostrar los cambios
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 function getOrders() {
     console.log('Fetching orders...');
