@@ -119,10 +119,16 @@
         function getOrders() {
             fetch(`${API_URL}/orders`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(orders => {
                 const orderList = document.getElementById('orderList');
                 orderList.innerHTML = '';
@@ -139,9 +145,25 @@
                     orderList.appendChild(orderDiv);
                 });
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                if (error.message.includes('401')) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    logout();
+                } else {
+                    alert('Error al obtener las órdenes');
+                }
+            });
         }
 
+        function logout() {
+            token = '';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('orderManagement').style.display = 'none';
+            document.getElementById('orderList').innerHTML = '';
+        }
+        
         function deleteOrder(id) {
             fetch(`${API_URL}/orders/${id}`, {
                 method: 'DELETE',
