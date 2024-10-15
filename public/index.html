@@ -34,10 +34,16 @@
             <input type="text" id="orderDate" placeholder="Fecha de Orden" required>
             <button type="submit">Agregar Orden</button>
         </form>
-
-        <button onclick="getOrders()" style="margin-top: 20px;">Obtener Órdenes</button>
+    
+        <h2>Buscar Orden por ID</h2>
+        <input type="number" id="orderId" placeholder="ID de la Orden">
+        <button onclick="getOrderById()">Buscar Orden</button>
+    
+        <button onclick="getOrders()" style="margin-top: 20px;">Obtener Todas las Órdenes</button>
+    
         <div id="orderList"></div>
     </div>
+    
 
     <script src="script.js"></script>
 </body>

@@ -124,3 +124,43 @@ document.getElementById('addOrderForm').addEventListener('submit', function(e) {
     })
     .catch(error => console.error('Error:', error));
 });
+
+function getOrderById() {
+    const orderId = document.getElementById('orderId').value;
+
+    if (!orderId) {
+        alert('Por favor, ingrese un ID válido.');
+        return;
+    }
+
+    fetch(`${API_URL}/orders/${orderId}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(order => {
+        const orderList = document.getElementById('orderList');
+        orderList.innerHTML = ''; // Limpiar resultados anteriores
+
+        if (order.error) {
+            alert('Orden no encontrada: ' + order.error);
+        } else {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'order';
+            orderDiv.innerHTML = `
+                <p>ID: ${order.OrderID}</p>
+                <p>Cliente: ${order.Client}</p>
+                <p>Productos: ${order.Products.join(', ')}</p>
+                <p>Total: ${order.total}</p>
+                <p>Estado: ${order.status}</p>
+                <p>Hora de Entrega: ${order.delivery_time}</p>
+                <p>Fecha de Orden: ${order.order_date}</p>
+                <button onclick="deleteOrder(${order.OrderID})">Eliminar</button>
+            `;
+            orderList.appendChild(orderDiv);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
